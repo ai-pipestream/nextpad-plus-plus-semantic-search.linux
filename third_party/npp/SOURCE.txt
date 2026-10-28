@@ -1,0 +1,22 @@
+Headers the plugin compiles against. plugin.h is a verbatim copy of the
+Linux host contract. scintilla_min.h is the slice of the Scintilla C API
+this plugin sends. Neither file is generated at build time, so the plugin
+configures without a checkout of the editor.
+
+plugin.h
+  repository: https://github.com/nextpad-plus-plus/nextpad-plus-plus-linux
+  commit: 8dec39c9f0f53aefc662520717fb7c0b6107fcdb
+  path: src/plugin.h
+
+scintilla_min.h
+  same commit, values taken from src/sci_messages.h and scintilla/include/Sci_Position.h
+  (Sci_Position is ptrdiff_t). The notification struct field order matches
+  that header so beNotified can read the host's SCNotification.
+
+Refresh both with tools/fetch-npp-headers.sh. Pass the editor checkout if
+you already have one:
+
+  tools/fetch-npp-headers.sh /path/to/nextpad-plus-plus-linux
+
+With no argument the script downloads plugin.h and src/sci_messages.h from
+the commit named above.
