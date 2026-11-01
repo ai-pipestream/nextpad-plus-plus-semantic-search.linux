@@ -18,10 +18,12 @@ long g_panel = 0;
 
 /* Editor-owned indicator numbers on nextpad-plus-plus-linux main
  * (commit 8dec39c). NPPM_ALLOCATEINDICATOR starts at 9 and does not skip
- * these, so a slot it hands back is discarded when it collides. */
+ * these, so a slot it hands back is discarded when it collides.
+ * 31 is Mark All (NPP_FIND_MARK_INDICATOR). Refuse it whenever the host
+ * returns it, including after other plugins have consumed earlier slots. */
 bool indicator_reserved(int slot)
 {
-    if (slot == 9 || slot == 19) return true;
+    if (slot == 9 || slot == 19 || slot == 31) return true;
     if (slot >= 21 && slot <= 25) return true;
     return false;
 }

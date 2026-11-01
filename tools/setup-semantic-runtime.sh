@@ -51,7 +51,14 @@ if command -v uv >/dev/null; then
     runtime=$("$package_dir/venv/bin/python" -c 'import pathlib, onnxruntime; print(pathlib.Path(onnxruntime.__file__).parent / "capi")')
 else
     # --target does not alter system Python, including on Jetson without venv.
-    python3 -m pip install --upgrade --target "$package_dir/python" "$package==$version"
+    # Ubuntu 24.04 marks the system interpreter as externally managed and
+    # rejects even a --target install unless this flag is present.
+    pip_extra=()
+    if python3 -m pip install --help 2>/dev/null | grep -q -- '--break-system-packages'; then
+        pip_extra+=(--break-system-packages)
+    fi
+    python3 -m pip install --upgrade --target "$package_dir/python" \
+        "${pip_extra[@]}" "$package==$version"
     runtime="$package_dir/python/onnxruntime/capi"
 fi
 mkdir -p "$package_dir/include" "$package_dir/lib"

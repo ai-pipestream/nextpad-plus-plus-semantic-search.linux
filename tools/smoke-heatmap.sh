@@ -2,7 +2,7 @@
 # Load this plugin into an unmodified build of Nextpad++ Linux (upstream
 # main) and check that a semantic heatmap paints under Xvfb.
 #
-# Two build aids live outside the tracked editor files:
+# Build aids live outside the tracked editor files:
 #
 # 1. scintilla/ and scintilla-patches/ are gitignored. A public clone does
 #    not contain the patch that defines gNppUseBoostRegex, which prefs.c
@@ -12,10 +12,11 @@
 #    Scintilla's own (SCI_OWNREGEX is not defined).
 #
 # 2. src/main.c calls macrobatch_show_dialog without including macrobatch.h.
-#    The function is defined in src/macrobatch.c. Clang treats the implicit
-#    declaration as an error. The editor is configured with
-#    -Wno-error=implicit-function-declaration. No tracked editor source is
-#    edited.
+#    The function is defined in src/macrobatch.c. Clang and GCC 14 treat the
+#    implicit declaration as an error. GCC 14 also errors on
+#    incompatible-pointer-types in the editor sources. The configure line
+#    downgrades those diagnostics. The same flags are warnings on GCC 13.
+#    No tracked editor source is edited.
 set -euo pipefail
 
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
@@ -64,9 +65,13 @@ if needle not in text:
     raise SystemExit("gtk4 makefile has no ListBoxGTK.o line to extend")
 path.write_text(text.replace(needle, "\tListBoxGTK.o \\\n\tnpp_regex_toggle.o\n", 1))
 PY
+    # GCC 14 defaults these to errors. GCC 13 already treats them as warnings,
+    # and accepts the same -Wno-error= form.
+    editor_cflags="-Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types"
     cmake -S "$editor_src" -B "$editor_src/build" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_C_FLAGS="-Wno-error=implicit-function-declaration"
+        -DCMAKE_C_FLAGS="$editor_cflags" \
+        -DCMAKE_CXX_FLAGS="$editor_cflags"
     cmake --build "$editor_src/build" -j"$(nproc)"
     NPP_EDITOR_BIN="$editor_src/build/Nextpad++"
 fi
