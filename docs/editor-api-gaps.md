@@ -24,9 +24,11 @@ Closing the frame hides the wrapper and does not notify the plugin. `PluginPanel
 | 9 | Incremental search (`INCR_INDICATOR`) | `src/editor.c` |
 | 19 | Clickable links (`NPP_LINK_INDICATOR`) | `src/editor.c` |
 | 21 to 25 | Mark colours (`NPP_MARK_INDIC_BASE`) | `src/main.c` |
-| 31 | Find marks (`NPP_FIND_MARK_INDICATOR`) | `src/findreplace.c` |
+| 31 | Mark All (`NPP_FIND_MARK_INDICATOR`) | `src/findreplace.c` |
 
-The plugin asks for one slot at a time and discards 9, 19, and 21 to 25 without painting them. The first plugin in a session therefore receives indicator 10. It does not discard 31, because one allocation never reaches 31. A plugin that runs after others have consumed the range can still be handed 31, and it would paint over find marks.
+The plugin asks for one slot at a time and discards 9, 19, 21 to 25, and 31 without painting them, whatever number `NPPM_ALLOCATEINDICATOR` returns. The first plugin in a session therefore receives indicator 10. If other plugins have taken the free numbers, it keeps asking until the host returns a free slot or refuses another one. It never paints 31.
+
+The host check is `s_next_indicator + count > 31`, so a one-slot request stops once the counter reaches 31 and 31 is not handed out by that comparison. The plugin does not rely on that. A host that returns 31 is still refused.
 
 `src/indicator_alloc.c` from pull request 28 starts at 9, skips 9 and 19, and stops at 20. The unit test still covers that helper. It is not the runtime allocator. A counter inside one plugin cannot see slots another plugin already took. The skip list belongs in `NPPM_ALLOCATEINDICATOR`, including 31.
 

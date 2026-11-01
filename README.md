@@ -64,7 +64,7 @@ A document larger than 2 MiB is not indexed. A document that is not UTF-8 is not
 
 `ctest` covers the tokenizer, the sentence splitter, heatmap colours, the model manifest, download cancellation, worker shutdown, the indicator helper from the editor proposal, a loader check of the `.so`, and the runtime-selection script. The loader check does not need a display. Embedding numbers run only when `NPP_SEMANTIC_TEST_MODEL_DIR` contains model files. When `libonnxruntime` is absent, the probe reports that it is disabled.
 
-`tools/smoke-heatmap.sh` builds Nextpad++ Linux from upstream main without modifying that tree, installs this plugin into a temporary data directory, and checks that a heatmap paints under Xvfb. The public editor sources do not include the maintainer's Scintilla patches, and `src/main.c` calls `macrobatch_show_dialog` without a declaration. The script's comments describe the two build aids it applies outside the tracked editor files.
+`tools/smoke-heatmap.sh` builds Nextpad++ Linux from upstream main without modifying that tree, installs this plugin into a temporary data directory, and checks that a heatmap paints under Xvfb. The public editor sources do not include the maintainer's Scintilla patches, and `src/main.c` calls `macrobatch_show_dialog` without a declaration. GCC 14 also rejects some pointer types in those sources. The script's comments describe the build aids it applies outside the tracked editor files.
 
 ## License
 
